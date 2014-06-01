@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.NetworkInfo;
 import android.os.Message;
+import android.telephony.TelephonyManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,6 +32,7 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private static int NETWORK_MODE_WCDMA_PREF = 0;
     private static int NETWORK_MODE_GSM_ONLY = 1;
+    private static int NETWORK_MODE_LTE_GSM_WCDMA  = 9; // works on galaxy s5
 
     public static final String ACTION_CHANGE_NETWORK_TYPE = "betoo.intent.action.CHANGE_NETWORK_TYPE";
     public static final String EXTRA_NETWORK_TYPE = "networkType";
@@ -55,8 +57,10 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
 
                 } else {
-                    Betoo.log("Setting preferred network type to 2G/GSM only! network type: " + networkType);
-                    setPreferredNetworkType(networkType);
+                    if(networkType != currentNetworkType) {
+                        Betoo.log("Setting preferred network type to 2G/GSM only! network type: " + networkType);
+                        setPreferredNetworkType(networkType);
+                    }
                 }
             }
         }
@@ -110,6 +114,9 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private static void onInitialize() {
         if (mContext != null) {
+            TelephonyManager teleMan = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            Betoo.log("TelephonyManager network type is: " + teleMan.getNetworkType());
+
             IntentFilter intentFilter = new IntentFilter(ACTION_CHANGE_NETWORK_TYPE);
             mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         }
@@ -140,8 +147,9 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
             int mode = (Integer) XposedHelpers.callStaticMethod(mSystemProperties, "getInt", "ro.telephony.default_network", -1);
 
             if(mode == -1) {
-                Betoo.log("Failed to detect default network type! Using: NETWORK_MODE_WCDMA_PREF");
-                mode = NETWORK_MODE_WCDMA_PREF;
+                Betoo.log("Failed to detect default network type! Using: NETWORK_MODE_LTE_GSM_WCDMA");
+                //mode = NETWORK_MODE_WCDMA_PREF;
+                mode = NETWORK_MODE_LTE_GSM_WCDMA;
             }
 
             currentNetworkType = mode;
