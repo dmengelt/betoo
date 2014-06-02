@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <!--int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */-->
+    <!--int NETWORK_MODE_GSM_ONLY       = 1; /* GSM only */-->
+    <!--int NETWORK_MODE_WCDMA_ONLY     = 2; /* WCDMA only */-->
+    <!--int NETWORK_MODE_GSM_UMTS       = 3; /* GSM/WCDMA (auto mode, according to PRL)-->
+    <!--AVAILABLE Application Settings menu*/-->
+    <!--int NETWORK_MODE_CDMA           = 4; /* CDMA and EvDo (auto mode, according to PRL)-->
+    <!--AVAILABLE Application Settings menu*/-->
+    <!--int NETWORK_MODE_CDMA_NO_EVDO   = 5; /* CDMA only */-->
+    <!--int NETWORK_MODE_EVDO_NO_CDMA   = 6; /* EvDo only */-->
+    <!--int NETWORK_MODE_GLOBAL         = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)-->
+    <!--AVAILABLE Application Settings menu*/-->
+    <!--int NETWORK_MODE_LTE_CDMA_EVDO  = 8; /* LTE, CDMA and EvDo */-->
+    <!--int NETWORK_MODE_LTE_GSM_WCDMA  = 9; /* LTE, GSM/WCDMA */-->
+    <!--int NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */-->
+    <!--int NETWORK_MODE_LTE_ONLY       = 11; /* LTE Only mode. */-->
+    <!--int NETWORK_MODE_LTE_WCDMA      = 12; /* LTE/WCDMA */-->
+
+<resources>
+    <string-array name="networkType">
+        <item name="0">GSM/WCDMA (WCDMA preferred)</item>
+        <item name="1">GSM only</item>
+        <item name="2">WCDMA only</item>
+        <item name="3">GSM/WCDMA (auto mode, according to PRL)</item>
+        <item name="4">CDMA and EvDo (auto mode, according to PRL)</item>
+        <item name="5">CDMA only</item>
+        <item name="6">EvDo only</item>
+        <item name="7">GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)</item>
+        <item name="8">LTE, CDMA and EvDo</item>
+        <item name="9">LTE, GSM/WCDMA </item>
+        <item name="10">LTE, CDMA, EvDo, GSM/WCDMA</item>
+        <item name="11">LTE Only mode</item>
+        <item name="12">LTE/WCDMA</item>
+    </string-array>
+    <string-array name="networkTypeValues">
+        <item name="0">0</item>
+        <item name="1">1</item>
+        <item name="2">2</item>
+        <item name="3">3</item>
+        <item name="4">4</item>
+        <item name="5">5</item>
+        <item name="6">6</item>
+        <item name="7">7</item>
+        <item name="8">8</item>
+        <item name="9">9</item>
+        <item name="10">10</item>
+        <item name="11">11</item>
+        <item name="12">12</item>
+    </string-array>
+
+</resources>

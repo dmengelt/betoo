@@ -10,6 +10,7 @@ import android.telephony.TelephonyManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -24,7 +25,7 @@ import static de.robv.android.xposed.XposedHelpers.getObjectField;
 /**
  * Created by domi on 5/30/14.
  */
-public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
+public class BetooXposedMod implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private static Context mContext;
     private static Class<?> mPhoneFactoryClass;
@@ -52,13 +53,13 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
                 if(networkType == -1) {
                     if(currentNetworkType != defaultNetworkType) {
-                        Betoo.log("Changing preferred network back to default network type: " + defaultNetworkType);
+                        BetooXposedMod.log("Changing preferred network back to default network type: " + defaultNetworkType);
                         setPreferredNetworkType(defaultNetworkType);
                     }
 
                 } else {
                     if(networkType != currentNetworkType) {
-                        Betoo.log("Setting preferred network type to 2G/GSM only! network type: " + networkType);
+                        BetooXposedMod.log("Setting preferred network type to 2G/GSM only! network type: " + networkType);
                         setPreferredNetworkType(networkType);
                     }
                 }
@@ -68,19 +69,17 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
-
         mPhoneFactoryClass = XposedHelpers.findClass("com.android.internal.telephony.PhoneFactory", null);
         mSystemProperties = XposedHelpers.findClass("android.os.SystemProperties", null);
 
         defaultNetworkType = getDefaultNetworkType();
-        Betoo.log("Setting default network type to: " + defaultNetworkType);
 
         XposedHelpers.findAndHookMethod(mPhoneFactoryClass, "makeDefaultPhone",
                 Context.class, new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                         mContext = (Context) param.args[0];
-                        Betoo.log("Initialized phone wrapper (makeDefaultPhone). Context is: " + mContext);
+                        BetooXposedMod.log("Initialized phone wrapper (makeDefaultPhone). Context is: " + mContext);
                         onInitialize();
                     }
                 }
@@ -100,13 +99,18 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         NetworkInfo.DetailedState state = (NetworkInfo.DetailedState) param.args[0];
                         Context context = (Context) getObjectField(param.thisObject, "mContext");
-                        Intent i = new Intent(Betoo.ACTION_CHANGE_NETWORK_TYPE);
+                        Intent i = new Intent(BetooXposedMod.ACTION_CHANGE_NETWORK_TYPE);
 
                         if (state.equals(NetworkInfo.DetailedState.CONNECTED)) {
-                            i.putExtra(Betoo.EXTRA_NETWORK_TYPE, NETWORK_MODE_GSM_ONLY);
+                            i.putExtra(BetooXposedMod.EXTRA_NETWORK_TYPE, NETWORK_MODE_GSM_ONLY);
 
                         }
-                        context.sendBroadcast(i);
+
+                        try {
+                            context.sendBroadcast(i);
+                        } catch (IllegalStateException e) {
+                            BetooXposedMod.log("Cannot broadcast before boot completed. Skipping broadcast...");
+                        }
                     }
                 }
         );
@@ -114,10 +118,8 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private static void onInitialize() {
         if (mContext != null) {
-            TelephonyManager teleMan = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-            Betoo.log("TelephonyManager network type is: " + teleMan.getNetworkType());
-
-            IntentFilter intentFilter = new IntentFilter(ACTION_CHANGE_NETWORK_TYPE);
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ACTION_CHANGE_NETWORK_TYPE);
             mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         }
     }
@@ -126,7 +128,7 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
         currentNetworkType = networkType;
         Object defPhone = XposedHelpers.callStaticMethod(mPhoneFactoryClass, "getDefaultPhone");
         if (defPhone == null) {
-            Betoo.log("Default phone was null! Unable to set preferred network type");
+            BetooXposedMod.log("Default phone was null! Unable to set preferred network type");
             return;
         }
 
@@ -135,10 +137,10 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
             paramArgs[0] = int.class;
             paramArgs[1] = Message.class;
             XposedHelpers.callMethod(defPhone, "setPreferredNetworkType", paramArgs, networkType, null);
-            Betoo.log("Successfully changed preferred network type to: " + networkType);
+            BetooXposedMod.log("Successfully changed preferred network type to: " + networkType);
 
         } catch (Throwable t) {
-            Betoo.log("Unable to set preferred network type: " + t.getMessage());
+            BetooXposedMod.log("Unable to set preferred network type: " + t.getMessage());
         }
     }
 
@@ -147,7 +149,7 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
             int mode = (Integer) XposedHelpers.callStaticMethod(mSystemProperties, "getInt", "ro.telephony.default_network", -1);
 
             if(mode == -1) {
-                Betoo.log("Failed to detect default network type! Using: NETWORK_MODE_LTE_GSM_WCDMA");
+                BetooXposedMod.log("Failed to detect default network type! Using: NETWORK_MODE_LTE_GSM_WCDMA");
                 //mode = NETWORK_MODE_WCDMA_PREF;
                 mode = NETWORK_MODE_LTE_GSM_WCDMA;
             }
@@ -156,12 +158,13 @@ public class Betoo implements IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             return mode;
         } catch (Throwable t) {
-            Betoo.log(t.getMessage());
+            BetooXposedMod.log(t.getMessage());
             return NETWORK_MODE_WCDMA_PREF;
         }
     }
 
     private static void log(String message) {
+        sdf.setTimeZone(TimeZone.getDefault());
         XposedBridge.log(sdf.format(new Date()) + " [Betoo] " + message);
     }
 }

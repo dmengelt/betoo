@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/network_settings_title" >
+        <!--<CheckBoxPreference-->
+            <!--android:defaultValue="false"-->
+            <!--android:key="prefSendReport"-->
+            <!--android:summary="@string/pref_send_report_summary"-->
+            <!--android:title="@string/pref_send_report" >-->
+        <!--</CheckBoxPreference>-->
+
+        <ListPreference
+            android:key="prefNetworkType"
+            android:entries="@array/networkType"
+            android:summary="@string/network_type_summary"
+            android:entryValues="@array/networkTypeValues"
+            android:title="@string/network_type_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
