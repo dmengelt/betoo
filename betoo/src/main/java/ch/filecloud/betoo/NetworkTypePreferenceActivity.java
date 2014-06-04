@@ -8,7 +8,7 @@ import android.view.MenuItem;
 /**
  * Created by domi on 6/2/14.
  */
-public class BetooPreferenceActivity extends PreferenceActivity {
+public class NetworkTypePreferenceActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
