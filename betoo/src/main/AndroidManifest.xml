@@ -22,7 +22,7 @@
             android:name="xposedminversion"
             android:value="2.0*" />
 
-        <activity android:name=".PreferenceActivity">
+        <activity android:name=".NetworkTypePreferenceActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
